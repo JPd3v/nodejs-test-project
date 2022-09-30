@@ -1,23 +1,29 @@
-const http = require("http");
-const url = require("node:url");
-const fs = require("fs");
-
+const express = require("express");
+const app = express();
 const port = 8080;
 
-const server = http.createServer((req, res) => {
-  const htmlFile = `.${req.url === "/" ? "/index" : req.url}.html`;
-
-  fs.readFile(htmlFile, (error, data) => {
-    if (error) {
-      res.writeHead(404, { "Content-Type": "text/html" });
-      return res.end("404 Not Found");
-    }
-    res.writeHead(200, { "Content-Type": "text/html" });
-    res.write(data);
-    return res.end();
-  });
+app.get("/", (req, res) => {
+  res.set("Content-Type", "text/html");
+  res.send(Buffer.from(responsePageLayout("index")));
+});
+app.get("/about", (req, res) => {
+  res.set("Content-Type", "text/html");
+  res.send(Buffer.from(responsePageLayout(req.originalUrl)));
+});
+app.get("/contact-me", (req, res) => {
+  res.set("Content-Type", "text/html");
+  res.send(Buffer.from(responsePageLayout(req.originalUrl)));
 });
 
-server.listen(port, () => {
+app.listen(port, () => {
   console.log(`Server running at port ${port}`);
 });
+
+function responsePageLayout(path) {
+  return `<ul>
+<li><a href="http://localhost:8080">home</a></li>
+<li><a href="http://localhost:8080/about">about</a></li>
+<li><a href="http://localhost:8080/contact-me">contact me</a></li>
+</ul>
+<h1>${path.replace(/[/]/g, "")}</h1>`;
+}
